@@ -369,6 +369,12 @@ module.exports = function (
 
   console.log();
   console.log(`Success! Created ${appName} at ${appPath}`);
+  console.log(chalk.cyan('Ingenium'));
+  console.log(
+    chalk.red(
+      'Hi! , I am Sidhant Dhar, the maintainer of this package. This is used by Ingenium to build custom builds that help run awesome web appications. If you want help for JS and /or Node.js email me @sidhant.d@ingeniumedu.com.'
+    )
+  );
   console.log('Inside that directory, you can run several commands:');
   console.log();
   console.log(chalk.cyan(`  ${displayedCommand} start`));

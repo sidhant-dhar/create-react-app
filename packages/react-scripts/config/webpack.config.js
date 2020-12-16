@@ -38,6 +38,7 @@ const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin'
 const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 // @remove-on-eject-end
 const postcssNormalize = require('postcss-normalize');
+const { styles } = require('@ckeditor/ckeditor5-dev-utils');
 
 const appPackageJson = require(paths.appPackageJson);
 
@@ -374,8 +375,42 @@ module.exports = function (webpackEnv) {
           // match the requirements. When no loader matches it will fall
           // back to the "file" loader at the end of the loader list.
           oneOf: [
+            /**** ckeditor configurations start here */
+
+            {
+              test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+              use: ['raw-loader'],
+            },
+            {
+              test: /ckeditor5-[^/\\]+[/\\]theme[/\\].+\.css$/,
+              use: [
+                {
+                  loader: 'style-loader',
+                  options: {
+                    injectType: 'singletonStyleTag',
+                    attributes: {
+                      'data-cke': true,
+                    },
+                  },
+                },
+                {
+                  loader: 'postcss-loader',
+                  options: styles.getPostCssConfig({
+                    themeImporter: {
+                      themePath: require.resolve(
+                        '@ckeditor/ckeditor5-theme-lark'
+                      ),
+                    },
+                    minify: true,
+                  }),
+                },
+              ],
+            },
+            /*****************************************CKEDITOR CONFIG ENDS */
+
             // TODO: Merge this config once `image/avif` is in the mime-db
             // https://github.com/jshttp/mime-db
+
             {
               test: [/\.avif$/],
               loader: require.resolve('url-loader'),
@@ -507,7 +542,10 @@ module.exports = function (webpackEnv) {
             // By default we support CSS Modules with the extension .module.css
             {
               test: cssRegex,
-              exclude: cssModuleRegex,
+              exclude: [
+                cssModuleRegex,
+                /ckeditor5-[^/\\]+[/\\]theme[/\\].+\.css$/,
+              ],
               use: getStyleLoaders({
                 importLoaders: 1,
                 sourceMap: isEnvProduction
@@ -524,6 +562,7 @@ module.exports = function (webpackEnv) {
             // using the extension .module.css
             {
               test: cssModuleRegex,
+              exclude: [/ckeditor5-[^/\\]+[/\\]theme[/\\].+\.css$/],
               use: getStyleLoaders({
                 importLoaders: 1,
                 sourceMap: isEnvProduction
@@ -583,7 +622,13 @@ module.exports = function (webpackEnv) {
               // its runtime that would otherwise be processed through "file" loader.
               // Also exclude `html` and `json` extensions so they get processed
               // by webpacks internal loaders.
-              exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+              exclude: [
+                /\.(js|mjs|jsx|ts|tsx)$/,
+                /\.html$/,
+                /\.json$/,
+                /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+                /ckeditor5-[^/\\]+[/\\]theme[/\\].+\.css$/,
+              ],
               options: {
                 name: 'static/media/[name].[hash:8].[ext]',
               },
